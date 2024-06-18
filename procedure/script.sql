@@ -1,13 +1,19 @@
--- 1.4 Procedimento com parâmetro INOUT
-CREATE OR REPLACE PROCEDURE sp_contar_pedidos_cliente_inout(
-    INOUT p_cod_cliente INT
+-- 1.5 Procedimento com parâmetro VARIADIC
+CREATE OR REPLACE PROCEDURE sp_cadastrar_clientes_variadic(
+    INOUT p_mensagem TEXT,
+    VARIADIC p_nomes VARCHAR[]
 ) LANGUAGE plpgsql AS $$
+DECLARE
+    v_nome VARCHAR;
 BEGIN
-    SELECT COUNT(*) INTO p_cod_cliente
-    FROM pedido
-    WHERE cod_cliente = p_cod_cliente;
+    FOREACH v_nome IN ARRAY p_nomes
+    LOOP
+        INSERT INTO tb_cliente (nome) VALUES (v_nome);
+    END LOOP;
+
+    p_mensagem := 'Os clientes: ' || array_to_string(p_nomes, ', ') || ' foram cadastrados';
 
     -- Registrar log
-    INSERT INTO log_operacoes (nome_procedimento) VALUES ('sp_contar_pedidos_cliente_inout');
+    INSERT INTO log_operacoes (nome_procedimento) VALUES ('sp_cadastrar_clientes_variadic');
 END;
 $$;
