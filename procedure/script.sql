@@ -1,19 +1,43 @@
--- 1.5 Procedimento com parâmetro VARIADIC
-CREATE OR REPLACE PROCEDURE sp_cadastrar_clientes_variadic(
-    INOUT p_mensagem TEXT,
-    VARIADIC p_nomes VARCHAR[]
-) LANGUAGE plpgsql AS $$
+-- 1.6 Blocos anônimos para executar cada procedimento
+DO $$
 DECLARE
-    v_nome VARCHAR;
+    v_resultado VARCHAR(500);
 BEGIN
-    FOREACH v_nome IN ARRAY p_nomes
-    LOOP
-        INSERT INTO tb_cliente (nome) VALUES (v_nome);
-    END LOOP;
-
-    p_mensagem := 'Os clientes: ' || array_to_string(p_nomes, ', ') || ' foram cadastrados';
-
-    -- Registrar log
-    INSERT INTO log_operacoes (nome_procedimento) VALUES ('sp_cadastrar_clientes_variadic');
+    CALL sp_obter_notas_para_compor_o_troco(v_resultado, 587);
+    RAISE NOTICE 'Resultado: %', v_resultado;
 END;
-$$;
+$$
+--
+DO $$
+BEGIN
+    CALL sp_contar_pedidos_cliente(1);
+END;
+$$
+---
+DO $$
+DECLARE
+    v_total_pedidos INT;
+BEGIN
+    CALL sp_contar_pedidos_cliente_out(1, v_total_pedidos);
+    RAISE NOTICE 'Total de pedidos: %', v_total_pedidos;
+END;
+$$
+---
+DO $$
+DECLARE
+    v_cod_cliente INT := 1;
+BEGIN
+    CALL sp_contar_pedidos_cliente_inout(v_cod_cliente);
+    RAISE NOTICE 'Total de pedidos: %', v_cod_cliente;
+END;
+$$
+---
+DO $$
+DECLARE
+    v_mensagem TEXT;
+BEGIN
+    CALL sp_cadastrar_clientes_variadic(v_mensagem, 'Pedro', 'Ana', 'João');
+    RAISE NOTICE '%', v_mensagem;
+END;
+$$
+------
