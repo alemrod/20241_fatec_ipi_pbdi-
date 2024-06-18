@@ -1,43 +1,24 @@
--- 1.6 Blocos anônimos para executar cada procedimento
-DO $$
+CREATE OR REPLACE PROCEDURE sp_obter_notas_para_compor_o_troco(
+	OUT p_resultado VARCHAR(500),
+	IN p_troco INT
+) LANGUAGE plpgsql AS $$
 DECLARE
-    v_resultado VARCHAR(500);
+	v_notas200 INT := 0;
+	v_notas100 INT := 0;
+	v_notas50 INT := 0;
+	v_notas20 INT := 0;
+	v_notas10 INT := 0;
+	v_notas5 INT := 0;
+	v_notas2 INT := 0;
+	v_moedas1 INT := 0;
 BEGIN
-    CALL sp_obter_notas_para_compor_o_troco(v_resultado, 587);
-    RAISE NOTICE 'Resultado: %', v_resultado;
+	v_notas200 := p_troco / 200;
+	v_notas100 := (p_troco % 200) / 100;
+	v_notas50 := (p_troco % 200 %100) / 50;
+	v_notas20 := (p_troco %200 %100 % 50) / 20;
+	v_notas10 := (p_troco %200 %100 % 50 % 20) / 10;
+	v_notas5 := (p_troco %200 %100 % 50 % 20 % 10) / 5;
+	v_notas2 := (p_troco %200 %100 % 50 % 20 % 10 %5) / 2;
+	v_moedas1 := (p_troco %200 %100 % 50 % 20 % 10 %5 %2) / 1;
 END;
 $$
---
-DO $$
-BEGIN
-    CALL sp_contar_pedidos_cliente(1);
-END;
-$$
----
-DO $$
-DECLARE
-    v_total_pedidos INT;
-BEGIN
-    CALL sp_contar_pedidos_cliente_out(1, v_total_pedidos);
-    RAISE NOTICE 'Total de pedidos: %', v_total_pedidos;
-END;
-$$
----
-DO $$
-DECLARE
-    v_cod_cliente INT := 1;
-BEGIN
-    CALL sp_contar_pedidos_cliente_inout(v_cod_cliente);
-    RAISE NOTICE 'Total de pedidos: %', v_cod_cliente;
-END;
-$$
----
-DO $$
-DECLARE
-    v_mensagem TEXT;
-BEGIN
-    CALL sp_cadastrar_clientes_variadic(v_mensagem, 'Pedro', 'Ana', 'João');
-    RAISE NOTICE '%', v_mensagem;
-END;
-$$
-------
